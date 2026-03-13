@@ -88,18 +88,14 @@ var branchCheckExemptCommands = map[string]bool{
 
 // persistentPreRun runs before every command.
 func persistentPreRun(cmd *cobra.Command, args []string) error {
-	// Check if binary was built properly (via make build, not raw go build).
-	// Raw go build produces unsigned binaries that macOS may kill.
-	// Warning only - doesn't block execution.
-	// Skip warning when Build was set by a package manager (e.g. Homebrew sets
-	// Build to "Homebrew" via ldflags but doesn't set BuiltProperly).
-	if BuiltProperly == "" && Build == "dev" {
-		fmt.Fprintln(os.Stderr, "WARNING: This binary was built with 'go build' directly.")
-		fmt.Fprintln(os.Stderr, "         Use 'make build' to create a properly signed binary.")
-		if gtRoot := os.Getenv("GT_ROOT"); gtRoot != "" {
-			fmt.Fprintf(os.Stderr, "         Run from: %s\n", gtRoot)
-		}
-	}
+	// [PIN] Disabled: go-build warning is noise when using `go install` to pin versions.
+	// if BuiltProperly == "" && Build == "dev" {
+	// 	fmt.Fprintln(os.Stderr, "WARNING: This binary was built with 'go build' directly.")
+	// 	fmt.Fprintln(os.Stderr, "         Use 'make build' to create a properly signed binary.")
+	// 	if gtRoot := os.Getenv("GT_ROOT"); gtRoot != "" {
+	// 		fmt.Fprintf(os.Stderr, "         Run from: %s\n", gtRoot)
+	// 	}
+	// }
 
 	// Initialize CLI theme (dark/light mode support)
 	initCLITheme()
@@ -121,10 +117,10 @@ func persistentPreRun(cmd *cobra.Command, args []string) error {
 	// Get the root command name being run
 	cmdName := cmd.Name()
 
-	// Check for stale binary (warning only, doesn't block)
-	if !beadsExemptCommands[cmdName] {
-		checkStaleBinaryWarning()
-	}
+	// [PIN] Disabled: stale binary check causes noise when pinning versions via `go install`.
+	// if !beadsExemptCommands[cmdName] {
+	// 	checkStaleBinaryWarning()
+	// }
 
 	// Check town root branch (warning only, non-blocking)
 	if !branchCheckExemptCommands[cmdName] {
